@@ -1,0 +1,313 @@
+swagger: "2.0"
+info:
+  description: "In For Dinner."
+  version: "1.0.0"
+  title: "In For Dinner"
+basePath: "/v1"
+paths:
+  /user:
+    post:
+      tags:
+      - "user"
+      summary: "Create user"
+      description: "This can only be done by the logged in user."
+      operationId: "createUser"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Created user object"
+        required: true
+        schema:
+          $ref: "#/definitions/User"
+      responses:
+        default:
+          description: "successful operation"
+  /user/login:
+    get:
+      tags:
+      - "user"
+      summary: "Logs user into the system"
+      description: ""
+      operationId: "loginUser"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "email"
+        in: "query"
+        description: "The user name for login"
+        required: true
+        type: "string"
+      - name: "password"
+        in: "query"
+        description: "The password for login in clear text"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            type: "string"
+          headers:
+            X-Rate-Limit:
+              type: "integer"
+              format: "int32"
+              description: "calls per hour allowed by the user"
+            X-Expires-After:
+              type: "string"
+              format: "date-time"
+              description: "date in UTC when token expires"
+        400:
+          description: "Invalid username/password supplied"
+  /user/logout:
+    get:
+      tags:
+      - "user"
+      summary: "Logs out current logged in user session"
+      description: ""
+      operationId: "logoutUser"
+      produces:
+      - "application/json"
+      parameters: []
+      responses:
+        default:
+          description: "successful operation"
+  /user/{id}:
+    get:
+      tags:
+      - "user"
+      summary: "Get user by user name"
+      description: ""
+      operationId: "getUserByName"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "The id that needs to be fetched. Use user1 for testing. "
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/User"
+        400:
+          description: "Invalid username supplied"
+        404:
+          description: "User not found"
+    put:
+      tags:
+      - "user"
+      summary: "Updated user"
+      description: "This can only be done by the logged in user."
+      operationId: "updateUser"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "id that need to be updated"
+        required: true
+        type: "string"
+      - in: "body"
+        name: "body"
+        description: "Updated user object"
+        required: true
+        schema:
+          $ref: "#/definitions/User"
+      responses:
+        400:
+          description: "Invalid user supplied"
+        404:
+          description: "User not found"
+    delete:
+      tags:
+      - "user"
+      summary: "Delete user"
+      description: "This can only be done by the logged in user."
+      operationId: "deleteUser"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "The id that needs to be deleted"
+        required: true
+        type: "string"
+      responses:
+        400:
+          description: "Invalid id supplied"
+        404:
+          description: "User not found"
+  /group:
+    post:
+      tags:
+      - "group"
+      summary: "Create a new group"
+      description: ""
+      operationId: "createGroup"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "New group"
+        required: true
+        schema:
+          $ref: "#/definitions/Group"
+      responses:
+        405:
+          description: "Invalid input"
+  /group/{id}:
+    put:
+      tags:
+      - "group"
+      summary: "Update an existing group"
+      description: ""
+      operationId: "updateGroup"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "path"
+        name: "id"
+        type: "number"
+        required: true
+      - in: "body"
+        name: "body"
+        description: "Modified group"
+        required: true
+        schema:
+          $ref: "#/definitions/Group"
+      responses:
+        400:
+          description: "Invalid ID supplied"
+        404:
+          description: "Group not found"
+        405:
+          description: "Validation exception"
+    get:
+      tags:
+      - "group"
+      summary: "Get a existing group"
+      description: ""
+      operationId: "getGroup"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "path"
+        name: "id"
+        required: true
+        type: "number"
+      responses:
+        200:
+          description: "success"
+          schema:
+            $ref: "#/definitions/GroupResponse"
+        400:
+          description: "Invalid ID supplied"
+        404:
+          description: "Group not found"
+        405:
+          description: "Validation exception"
+  /group/{id}/dailyStatus/{userId}:
+    put:
+      tags:
+      - "group"
+      - "status"
+      summary: "Sets the status of a user within a group"
+      operationId: "setStatusOfUser"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "path"
+        name: "id"
+        description: "Id of the group"
+        required: true
+        type: "number"
+      - in: "path"
+        name: "userId"
+        description: "Id of the user"
+        required: true
+        type: "number"
+      - in: "body"
+        name: "status"
+        required: true
+        schema:       
+          $ref: "#/definitions/ReservationStatus"
+      responses:
+        200:
+          description: "successful operation"
+        400:
+          description: "Invalid status value"
+definitions:
+  DailyStatus:
+    type: "object"
+    properties:
+      userId:
+        type: "integer"
+        format: "int64"
+      date:
+        type: "string"
+        format: "date-time"
+      detail:
+        type: "string"
+      status:
+        $ref: "#/definitions/ReservationStatus"
+  ReservationStatus:
+    type: "string"
+    enum:
+        - "in"
+        - "out"
+        - "maybe"
+        - "not seen"
+  Group:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+        format: "int64"
+      name:
+        type: "string"
+  GroupResponse:
+    type: "object"
+    properties:
+      group:
+        $ref: "#/definitions/Group"
+      users:
+        type: "array"
+        items:
+          $ref: "#/definitions/User"
+      status:
+        type: "array"
+        items:
+          $ref: "#/definitions/DailyStatus"
+  User:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+        format: "int64"
+      name:
+        type: "string"
+      email:
+        type: "string"
+      password:
+        type: "string"
+  ApiResponse:
+    type: "object"
+    properties:
+      code:
+        type: "integer"
+        format: "int32"
+      type:
+        type: "string"
+      message:
+        type: "string"
